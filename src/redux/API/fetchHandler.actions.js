@@ -35,10 +35,19 @@ const fetchLGAList = () => async (dispatch) => {
   }
 };
 
-const setLGAList = () => ({});
+const setLGAList = (LGAlist) => ({
+  type: 'FETCH_LGA',
+  payload: { LGAlist },
+});
+
+const dataLayerSelected = (LGA) => ({
+  type: 'ACTIVE_DATALAYER',
+  payload: { LGA },
+});
 
 const fetchActions = {
   fetchLGAList,
   setLGAList,
+  dataLayerSelected,
 };
 export default fetchActions;
