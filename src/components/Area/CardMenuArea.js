@@ -30,57 +30,86 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const useFetch = (url) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+// const useFetch = (url) => {
+//   const [data, setData] = useState(null);
+//   const [loading, setLoading] = useState(true);
 
+//   const userReducer = useSelector((state) => state.userReducer);
+//   const activeToken = userReducer.currentUser.token;
+
+//   console.log(activeToken);
+
+//   const headers = {
+//     'Content-Type': 'application/json',
+//     Authorization: activeToken,
+//   };
+
+//   useEffect(() => {
+//     const loadLGA = async () => {
+//       const response = await fetch(url, { headers });
+//       const data = await response.json();
+//       const [LGAitem] = data.data.features;
+//       setData(LGAitem);
+//       setLoading(false);
+//     };
+//     loadLGA();
+//   }, []);
+
+//   return { data, loading };
+// };
+
+const CardMenuArea = () => {
+  const classes = useStyles();
+  const url = `https://app.cdmps.org.au/services/caseareas/asgsboundaries?config={"typename":"ABS:lga_2016_aust","propertynames":"lga_code16,lga_name16,ste_code16,ste_name16","cql_filter":"ste_name16='Victoria'"}`;
+
+  // const { data, loading } = useFetch(
+  //   `https://app.cdmps.org.au/services/caseareas/asgsboundaries?config={"typename":"ABS:lga_2016_aust","propertynames":"lga_code16,lga_name16,ste_code16,ste_name16","cql_filter":"ste_name16='Victoria'"}`
+  // );
+  //console.log(data);
+  //console.log(loading);
+
+  const [rawData, setrawData] = useState({});
+  const [lgaData, setlgaData] = useState([]);
+  const [sub1values, setsub1values] = useState([]);
+  const [sub2values, setsub2values] = useState([]);
+  const [isShowingSubMenu, setisShowingSubMenu] = useState(false);
+
+  const [loading, setLoading] = useState(true);
   const userReducer = useSelector((state) => state.userReducer);
   const activeToken = userReducer.currentUser.token;
+  //console.log(activeToken);
 
-  console.log(activeToken);
+  const fetchData = useSelector(
+    (state) => state.fetchHandlerReducer.currentLGAs
+  );
+  const dispatch = useDispatch();
 
   const headers = {
     'Content-Type': 'application/json',
     Authorization: activeToken,
   };
 
-  // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     const loadLGA = async () => {
       const response = await fetch(url, { headers });
       const data = await response.json();
-      const [LGAitem] = data.data.features;
-      setData(LGAitem);
+      const LGAitem = data.data;
+      setrawData(LGAitem);
+      setlgaData(LGAitem.features);
       setLoading(false);
     };
     loadLGA();
   }, []);
 
-  return { data, loading };
-};
-
-const CardMenuArea = () => {
-  const classes = useStyles();
-
-  const [count, setCount] = useState(0);
-  const { data, loading } = useFetch(
-    `https://app.cdmps.org.au/services/caseareas/asgsboundaries?config={"typename":"ABS:lga_2016_aust","propertynames":"lga_code16,lga_name16,ste_code16,ste_name16","cql_filter":"ste_name16='Victoria'"}`
-  );
-
-  console.log(data);
-  console.log(loading);
-
-  const [sub1values, setsub1values] = useState('');
-  const [sub2values, setsub2values] = useState('');
-  const [isShowingSubMenu, setisShowingSubMenu] = useState(false);
-
-  const fetchData = useSelector(
-    (state) => state.fetchHandlerReducer.currentData
-  );
-  const dispatch = useDispatch();
+  //dispatch(fetchActions.setLGAList(rawData));
+  // console.log(rawData);
+  //console.log(lgaData);
 
   const showSubLevel2 = () => {
-    setisShowingSubMenu(!isShowingSubMenu);
+    // setisShowingSubMenu(!isShowingSubMenu);
+    setisShowingSubMenu(true);
+    dispatch(fetchActions.setLGAList(lgaData));
+    console.log(fetchData);
   };
 
   const handleChange = (event) => {
@@ -89,31 +118,11 @@ const CardMenuArea = () => {
     setsub1values(event.target.value);
   };
 
-  // useEffect(() => {
-  //   const loadLGAdata = () => {
-  //     //care about parenthesis, try
-  //     console.log('Is gonna load something');
-  //     dispatch(fetchActions.fetchLGAList());
-  //   };
-
-  //   loadLGAdata();
-  // }, []);
-
-  // const loadLGAdata = () => {
-  //   //care about parenthesis, try
-  //   console.log('Is gonna load something');
-  //   dispatch(fetchActions.fetchLGAList());
-  // };
-
   const handleChange2 = (event) => {
     // const { value, name } = event.target;
     // setValues({ ...values, [name]: value });
     setsub2values(event.target.value);
   };
-
-  // const onClickSave = () => {
-  //   alert('Local Government Area selected');
-  // };
 
   return (
     <Card className={classes.floatingObject}>
@@ -136,7 +145,24 @@ const CardMenuArea = () => {
               onChange={handleChange}
               variant="outlined"
             >
-              {subLevel1Data.map((option) => (
+              <MenuItem key="subLv1" value="subLv1" disabled={true}>
+                Commonwealth Electoral Divisions
+              </MenuItem>
+              <MenuItem key="subLv2" value="subLv2" disabled={true}>
+                Greater Capital City Statistical Areas
+              </MenuItem>
+              <MenuItem
+                key="subLv3"
+                value="subLv3"
+                disabled={false}
+                onClick={showSubLevel2}
+              >
+                Local Government Areas
+              </MenuItem>
+              <MenuItem key="subLv4" value="subLv4" disabled={true}>
+                Statistical Divisions
+              </MenuItem>
+              {/* {subLevel1Data.map((option) => (
                 <MenuItem
                   key={option.value}
                   value={option.value}
@@ -144,10 +170,10 @@ const CardMenuArea = () => {
                 >
                   {option.label}
                 </MenuItem>
-              ))}
+              ))} */}
             </TextField>
           </Grid>
-          {isShowingSubMenu && (
+          {isShowingSubMenu && !loading && (
             <Grid item xs={12}>
               <TextField
                 id="tf_sublevel2"
@@ -158,11 +184,19 @@ const CardMenuArea = () => {
                 onChange={handleChange2}
                 variant="outlined"
               >
-                {subLevel2Data.map((option) => (
+                {lgaData.map((option) => (
+                  <MenuItem
+                    key={option.properties.lga_code16}
+                    value={option.properties.lga_name16}
+                  >
+                    {option.properties.lga_name16}
+                  </MenuItem>
+                ))}
+                {/* {subLevel2Data.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
                   </MenuItem>
-                ))}
+                ))} */}
               </TextField>
             </Grid>
           )}

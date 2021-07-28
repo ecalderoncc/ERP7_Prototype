@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   LayerGroup,
   MapContainer,
@@ -18,6 +19,15 @@ const LeafletMapView = (props) => {
     zoom: 8,
     setInitial: true,
   });
+  const [activeLayer, setactiveLayer] = useState('');
+
+  const fetchData = useSelector(
+    (state) => state.fetchHandlerReducer.dataLayerActive
+  );
+
+  // if (fetchData.dl_typename != null) {
+  //   setactiveLayer(fetchData.dl_typename);
+  // }
 
   const setMapInitialState = () => {
     setmapState({
@@ -34,12 +44,12 @@ const LeafletMapView = (props) => {
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         />
         <LayerGroup>
-          {/* <WMSTileLayer
-            layers="ERP7:river_red_gum_bnd"
+          <WMSTileLayer
+            layers={activeLayer}
             url="https://ds2.digitwin.com.au:8443/geoserver/ERP7/wms?service=WMS"
             format="image/png"
             transparent={true}
-          /> */}
+          />
           {/* <WMSTileLayer
             layers="ERP7:log_season"
             url="https://ds2.digitwin.com.au:8443/geoserver/ERP7/wms?service=WMS"
