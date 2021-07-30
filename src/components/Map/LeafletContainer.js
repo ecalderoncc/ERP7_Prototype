@@ -4,7 +4,7 @@ import LeafletMap from './LeafletMap';
 import LeafletMapView from './LeafletMapView';
 
 const LeafletContainer = () => {
-  return <LeafletMapView initialMapProps={true} />;
+  return <LeafletMapView />;
 };
 
 export default LeafletContainer;

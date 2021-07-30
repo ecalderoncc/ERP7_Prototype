@@ -30,27 +30,28 @@ const useStyles = makeStyles((theme) => ({
     width: '450px',
   },
   root: {
-    maxHeight: 350,
+    maxHeight: 450,
     overflow: 'auto',
   },
 }));
 
 const CardMenuData = () => {
   const classes = useStyles();
+  const urlDatalayers = `https://app.cdmps.org.au/services/data/management/datalayer/saved`;
 
-  const url = `https://app.cdmps.org.au/services/data/management/datalayer/saved`;
-
-  const [selectedIndex, setSelectedIndex] = useState();
+  //LOCAL
+  //const [selectedIndex, setSelectedIndex] = useState();
   const [loading, setLoading] = useState(true);
   const [dataLayers, setdataLayers] = useState([]);
+  const [buttonState, setbuttonState] = useState(true);
 
+  //REDUX
+  const fetchData = useSelector((state) => state.fetchHandlerReducer.dataLayer);
+  const dispatch = useDispatch();
+
+  //User Token
   const userReducer = useSelector((state) => state.userReducer);
   const activeToken = userReducer.currentUser.token;
-
-  const fetchData = useSelector(
-    (state) => state.fetchHandlerReducer.dataLayerActive
-  );
-  const dispatch = useDispatch();
 
   const headers = {
     'Content-Type': 'application/json',
@@ -59,24 +60,29 @@ const CardMenuData = () => {
 
   useEffect(() => {
     const loadDataLayers = async () => {
-      const response = await fetch(url, { headers });
+      const response = await fetch(urlDatalayers, { headers });
       const data = await response.json();
       setdataLayers(data.data);
+      //console.log(data.data);
       setLoading(false);
     };
     loadDataLayers();
   }, []);
 
-  //console.log(dataLayers);
+  // const handleListItemClick = (event, index) => {
+  //   setSelectedIndex(index);
+  // };
 
-  const handleListItemClick = (event, index) => {
-    setSelectedIndex(index);
+  const sendDatalayer = (dataLayer) => {
+    dispatch(fetchActions.setDataLayer(dataLayer));
+    console.log('Data Card sent');
+    //console.log(dataLayer.dl_title);
+    setbuttonState(false);
   };
 
-  const showDataLayer = (dataLayer) => {
-    //console.log(dataLayer.dl_typename);
-    dispatch(fetchActions.dataLayerSelected(dataLayer));
-    console.log(fetchData);
+  const clearLayer = () => {
+    dispatch(fetchActions.clearDatalayer());
+    setbuttonState(true);
   };
 
   return (
@@ -89,30 +95,13 @@ const CardMenuData = () => {
             </Typography>
           </Grid>
           <Grid item xs={12}>
-            {/* <ButtonGroup
-              fullWidth
-              orientation="vertical"
-              color="primary"
-              aria-label="vertical outlined primary button group"
-            >
-              <Button>EVC (environmental Vegetation Class)</Button>
-              <Button>
-                Final VEAC boundary for the River Red Gum Forests Investigation
-              </Button>
-              <Button>Fire Severity</Button>
-            </ButtonGroup> */}
             <List
               component="nav"
               aria-label="datalist"
               className={classes.root}
             >
               {loading ? (
-                <ListItem
-                  button
-                  disabled={true}
-                  // selected={selectedIndex === 2}
-                  // onClick={(event) => handleListItemClick(event, 2)}
-                >
+                <ListItem button disabled={true}>
                   <ListItemText primary="Loading..." />
                 </ListItem>
               ) : (
@@ -124,22 +113,27 @@ const CardMenuData = () => {
                     // onClick={(event) =>
                     //   handleListItemClick(event, dataLayers.findIndex(option))
                     // }
-                    onClick={() => showDataLayer(option)}
+                    onClick={() => sendDatalayer(option)}
                   >
-                    <ListItemText primary={option.dl_title} />
+                    <ListItemText primary={option.sdl_displayname} />
                   </ListItem>
                 ))
               )}
             </List>
           </Grid>
-          {/* <Grid item xs={12}>
-            <Box height={250}></Box>
-          </Grid> */}
-          {/* <Grid item xs={12}>
-            <Button variant="contained" color="primary" onClick={onClickSave}>
-              Done
+          <Grid item xs={12}>
+            <Box height={30}></Box>
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={buttonState}
+              onClick={clearLayer}
+            >
+              Clear
             </Button>
-          </Grid> */}
+          </Grid>
         </Grid>
       </CardContent>
     </Card>

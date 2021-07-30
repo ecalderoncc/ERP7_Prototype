@@ -9,6 +9,7 @@ import {
   MenuItem,
   Typography,
   Box,
+  Button,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -30,86 +31,63 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// const useFetch = (url) => {
-//   const [data, setData] = useState(null);
-//   const [loading, setLoading] = useState(true);
-
-//   const userReducer = useSelector((state) => state.userReducer);
-//   const activeToken = userReducer.currentUser.token;
-
-//   console.log(activeToken);
-
-//   const headers = {
-//     'Content-Type': 'application/json',
-//     Authorization: activeToken,
-//   };
-
-//   useEffect(() => {
-//     const loadLGA = async () => {
-//       const response = await fetch(url, { headers });
-//       const data = await response.json();
-//       const [LGAitem] = data.data.features;
-//       setData(LGAitem);
-//       setLoading(false);
-//     };
-//     loadLGA();
-//   }, []);
-
-//   return { data, loading };
-// };
-
 const CardMenuArea = () => {
   const classes = useStyles();
-  const url = `https://app.cdmps.org.au/services/caseareas/asgsboundaries?config={"typename":"ABS:lga_2016_aust","propertynames":"lga_code16,lga_name16,ste_code16,ste_name16","cql_filter":"ste_name16='Victoria'"}`;
+  const urlLGA = `https://app.cdmps.org.au/services/caseareas/asgsboundaries?config={"typename":"ABS:lga_2016_aust","propertynames":"lga_code16,lga_name16,ste_code16,ste_name16","cql_filter":"ste_name16='Victoria'"}`;
 
-  // const { data, loading } = useFetch(
-  //   `https://app.cdmps.org.au/services/caseareas/asgsboundaries?config={"typename":"ABS:lga_2016_aust","propertynames":"lga_code16,lga_name16,ste_code16,ste_name16","cql_filter":"ste_name16='Victoria'"}`
-  // );
-  //console.log(data);
-  //console.log(loading);
-
-  const [rawData, setrawData] = useState({});
-  const [lgaData, setlgaData] = useState([]);
+  //LOCAL
   const [sub1values, setsub1values] = useState([]);
   const [sub2values, setsub2values] = useState([]);
-  const [isShowingSubMenu, setisShowingSubMenu] = useState(false);
-
   const [loading, setLoading] = useState(true);
+  const [butonState, setbutonState] = useState(true);
+
+  //REDUX
+  const [lgaData, setlgaData] = useState([]);
+  const [isShowingSubMenu, setisShowingSubMenu] = useState(false);
+  const [selectedLGA, setselectedLGA] = useState({});
+
+  //const fetchLGA = useSelector((state) => state.fetchHandlerReducer.lga);
+  const dispatch = useDispatch();
+
+  //User Token
   const userReducer = useSelector((state) => state.userReducer);
   const activeToken = userReducer.currentUser.token;
   //console.log(activeToken);
-
-  const fetchData = useSelector(
-    (state) => state.fetchHandlerReducer.currentLGAs
-  );
-  const dispatch = useDispatch();
 
   const headers = {
     'Content-Type': 'application/json',
     Authorization: activeToken,
   };
 
-  useEffect(() => {
-    const loadLGA = async () => {
-      const response = await fetch(url, { headers });
-      const data = await response.json();
-      const LGAitem = data.data;
-      setrawData(LGAitem);
-      setlgaData(LGAitem.features);
-      setLoading(false);
-    };
-    loadLGA();
-  }, []);
+  //**** FUNCTIONS ****
 
-  //dispatch(fetchActions.setLGAList(rawData));
-  // console.log(rawData);
-  //console.log(lgaData);
+  const loadLGA = async () => {
+    const response = await fetch(urlLGA, { headers });
+    const data = await response.json();
+    const LGAitem = data.data;
+    setlgaData(LGAitem.features);
+    setLoading(false);
+  };
 
   const showSubLevel2 = () => {
     // setisShowingSubMenu(!isShowingSubMenu);
     setisShowingSubMenu(true);
+    loadLGA();
     dispatch(fetchActions.setLGAList(lgaData));
-    console.log(fetchData);
+  };
+
+  const sendLGAOption = (lgaOption) => {
+    //setselectedLGA(null);
+    setselectedLGA(lgaOption);
+    //console.log(selectedLGA);
+    setbutonState(false);
+    //console.log(lgaData);
+    //console.log(lgaOption.properties.lga_name16);
+  };
+
+  const select = () => {
+    dispatch(fetchActions.setLGA(selectedLGA));
+    //console.log(fetchLGA);
   };
 
   const handleChange = (event) => {
@@ -145,6 +123,7 @@ const CardMenuArea = () => {
               onChange={handleChange}
               variant="outlined"
             >
+              {/* Pregunta para jeanpi */}
               <MenuItem key="subLv1" value="subLv1" disabled={true}>
                 Commonwealth Electoral Divisions
               </MenuItem>
@@ -188,6 +167,7 @@ const CardMenuArea = () => {
                   <MenuItem
                     key={option.properties.lga_code16}
                     value={option.properties.lga_name16}
+                    onClick={() => sendLGAOption(option)}
                   >
                     {option.properties.lga_name16}
                   </MenuItem>
@@ -202,13 +182,18 @@ const CardMenuArea = () => {
           )}
 
           <Grid item xs={12}>
-            <Box height={250}></Box>
+            <Box height={150}></Box>
           </Grid>
-          {/* <Grid item xs={12}>
-            <Button variant="contained" color="primary" onClick={showCardMenu}>
-              Done
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={butonState}
+              onClick={select}
+            >
+              Select
             </Button>
-          </Grid> */}
+          </Grid>
         </Grid>
       </CardContent>
     </Card>

@@ -1,12 +1,11 @@
 const INITIAL_STATE = {
   currentLGAs: null,
-  // appColors: JSON.parse(sessionStorage.getItem("appColors")),
-  // isAuthenticated: false,
-  // users: [],
-  // errorMessage: null,
-  // loading: false,
-  dataLayerActive: null,
-  active: false,
+
+  dataLayer: null,
+  activeLayer: false,
+
+  lga: null,
+  activeLGA: false,
 };
 
 const fetchHandlerReducer = (state = INITIAL_STATE, action) => {
@@ -19,8 +18,24 @@ const fetchHandlerReducer = (state = INITIAL_STATE, action) => {
     case 'ACTIVE_DATALAYER':
       return {
         ...state,
-        dataLayerActive: action.payload,
-        active: true,
+        dataLayer: action.payload,
+        activeLayer: true,
+      };
+    case 'SET_LGA':
+      return {
+        ...state,
+        lga: action.payload,
+        activeLGA: true,
+      };
+    case 'DEACTIVE_LGA':
+      return {
+        ...state,
+        activeLGA: false,
+      };
+    case 'CLEAR_DATALAYER':
+      return {
+        ...state,
+        dataLayer: null,
       };
     default:
       return state;

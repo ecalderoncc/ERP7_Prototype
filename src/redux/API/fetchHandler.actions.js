@@ -40,14 +40,37 @@ const setLGAList = (LGAlist) => ({
   payload: { LGAlist },
 });
 
-const dataLayerSelected = (LGA) => ({
-  type: 'ACTIVE_DATALAYER',
-  payload: { LGA },
-});
+const setDataLayer = (dataLayer) => (dispatch) => {
+  dispatch({
+    type: 'ACTIVE_DATALAYER',
+    payload: dataLayer,
+  });
+};
+
+const clearDatalayer = () => (dispatch) => {
+  dispatch({
+    type: 'CLEAR_DATALAYER',
+  });
+};
+
+const setLGA = (LGA) => (dispatch) => {
+  dispatch({
+    type: 'SET_LGA',
+    payload: LGA,
+  });
+};
+
+const deActivateLGA = () => (dispatch) => {
+  dispatch({
+    type: 'DEACTIVE_LGA',
+  });
+};
 
 const fetchActions = {
-  fetchLGAList,
   setLGAList,
-  dataLayerSelected,
+  setDataLayer,
+  setLGA,
+  deActivateLGA,
+  clearDatalayer,
 };
 export default fetchActions;
