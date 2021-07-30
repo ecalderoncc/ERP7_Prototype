@@ -9,6 +9,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "express": "^4.17.1",
     "leaflet": "^1.7.1",
     "leaflet-vector-tile-layer": "^0.5.1",
     "pbf": "^3.2.1",
